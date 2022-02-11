@@ -15,7 +15,7 @@ on:
       - '**/testsuite'
       - '**/examples'
       - '**/quarkus/tests'
-      - '**/operator/src/test'  
+      - '**/**/src/test/**'  
       - '**/boms'
       - '**/docs'
 
