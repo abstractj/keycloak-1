@@ -14,7 +14,8 @@ on:
     paths-ignore:
       - '**/testsuite'
       - '**/examples'
-      - '**/quarkus/tests'  
+      - '**/quarkus/tests'
+      - '**/operator/src/test'  
       - '**/boms'
       - '**/docs'
 
