@@ -1,6 +1,6 @@
 # Keycloak
 
-Keycloak is an Open Source Identity and Access Management solution for modern Applications and Services.
+Keycloak 17.0.0 is an Open Source Identity and Access Management solution for modern Applications and Services.
 
 This repository contains the source code for the Keycloak Server, Java adapters and the JavaScript adapter.
 
