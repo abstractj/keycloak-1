@@ -2042,7 +2042,17 @@
                 <module>examples</module>
             </modules>
         </profile>
-
+        <profile>
+            <id>adapters</id>
+            <activation>
+                <property>
+                    <name>!skipAdapters</name>
+                </property>
+            </activation>
+            <modules>
+                <module>adapters</module>
+            </modules>
+        </profile>
         <profile>
             <id>distribution</id>
             <modules>
