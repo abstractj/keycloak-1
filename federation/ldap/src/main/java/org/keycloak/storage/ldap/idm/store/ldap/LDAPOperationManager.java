@@ -253,7 +253,7 @@ public class LDAPOperationManager {
             return execute(new LdapOperation<List<SearchResult>>() {
                 @Override
                 public List<SearchResult> execute(LdapContext context) throws NamingException {
-                    NamingEnumeration<SearchResult> search = context.search(new LdapName(baseDN), filter, cons);
+                    NamingEnumeration<SearchResult> search = null;
 
                     while (search.hasMoreElements()) {
                         result.add(search.nextElement());
