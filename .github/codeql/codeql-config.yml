@@ -3,6 +3,5 @@ name: "CodeQL Configuration File"
 disable-default-queries: true
 
 queries:
-  - uses: security-and-quality
   - uses: ./.github/codeql/custom-queries.qls
   
