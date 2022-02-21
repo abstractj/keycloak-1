@@ -36,6 +36,8 @@
 
     <properties>
         <quarkus.version>2.7.0.Final</quarkus.version>
+        <sonar.organization>keycloak-poc</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <!--
         Performing a Wildfly upgrade? Run the:
