@@ -30,9 +30,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Update maven settings
-      run: mkdir -p ~/.m2 ; cp .github/settings.xml ~/.m2/
-
     - name: Install CodeQL
       run: |
         wget https://github.com/github/codeql-cli-binaries/releases/download/v2.8.1/codeql-linux64.zip
@@ -42,19 +39,30 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '11'
+    
+    - name: Install jq
+      run: |
+        apt-get install jq -y
+
+    - name: Update maven settings
+      run: mkdir -p ~/.m2 ; cp .github/settings.xml ~/.m2/
 
     # Create the codeql database for Java and JavaScript
     - name: Create CodeQL database
       run: |
-        ./codeql/codeql database create analysis-database --language=java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
+        ./codeql/codeql database create analysis-database --language=java,javascript --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
     
     # Run the analysis
     - name: Run CodeQL analysis for Java
       run: |
-        ./codeql/codeql database analyze analysis-database codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1 --sarif-add-query-help
+        ./codeql/codeql database analyze analysis-database codeql/java-queries codeql/javascript-queries --format=sarifv2.1.0 --output=results.sarif --download --max-paths=1 --sarif-add-query-help
+    
+    - name: Strip optional paths
+      run: |
+        cat results.sarif | jq 'del(.runs[].results[].codeFlows)' > processed.sarif
     
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v1
       with:
         # Path to SARIF file relative to the root of the repository
-        sarif_file: java.sarif
+        sarif_file: processed.sarif
