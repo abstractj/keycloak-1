@@ -70,13 +70,14 @@ jobs:
         ./codeql/codeql database analyze analysis-database/javascript codeql/javascript-queries --format=sarifv2.1.0 --output=javascript.sarif --download --max-paths=1
     
     # Upload the results
-    - name: Upload results to Github
-      if: ${{ matrix.language == 'java' }}
-      run: |
-        ./codeql/codeql github upload-results --sarif=java.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF}
-          
+    - name: Upload Java results to Github
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: java.sarif
+        
     # Upload the results
-    - name: Upload results to Github
-      if: ${{ matrix.language == 'javascript' }}
-      run: |
-        ./codeql/codeql github upload-results --sarif=javascript.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF}
+    - name: Upload JavaScript results to Github
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: javascript.sarif         
+    
