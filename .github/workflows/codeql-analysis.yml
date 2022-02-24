@@ -26,15 +26,6 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        # Override automatic language detection by changing the below list
-        # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        language: ['java']
-        # Learn more...
-        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -48,51 +39,22 @@ jobs:
         unzip codeql-linux64.zip
     
     - uses: actions/setup-java@v2
-      if: ${{ matrix.language == 'java' }}
       with:
         distribution: 'temurin'
         java-version: '11'
 
     # Create the codeql database for Java and JavaScript
     - name: Create CodeQL database
-      if: ${{ matrix.language == 'java' }}
       run: |
-        ./codeql/codeql database create analysis-database --db-cluster --language=java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
-    
-    # Create the codeql database for Java and JavaScript
-    - name: Create CodeQL database
-      if: ${{ matrix.language == 'javascript' }}
-      run: |
-        ./codeql/codeql database create analysis-database --db-cluster --language=javascript
+        ./codeql/codeql database create analysis-database --language=java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
     
     # Run the analysis
     - name: Run CodeQL analysis for Java
-      if: ${{ matrix.language == 'java' }}
       run: |
         ./codeql/codeql database analyze analysis-database/java codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1
     
-    # Run the analysis
-    - name: Run CodeQL analysis for JavaScript
-      if: ${{ matrix.language == 'javascript' }}
-      run: |
-        ./codeql/codeql database analyze analysis-database/javascript codeql/javascript-queries --format=sarifv2.1.0 --output=javascript.sarif --download --max-paths=1
-    
     - name: Upload SARIF file
-      if: ${{ matrix.language == 'java' }}
       uses: github/codeql-action/upload-sarif@v1
       with:
         # Path to SARIF file relative to the root of the repository
         sarif_file: java.sarif
-        # Optional category for the results
-        # Used to differentiate multiple results for one commit
-        category: CodeQL-Java
-    
-    - name: Upload SARIF file
-      if: ${{ matrix.language == 'javascript' }}
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        # Path to SARIF file relative to the root of the repository
-        sarif_file: javascript.sarif
-        # Optional category for the results
-        # Used to differentiate multiple results for one commit
-        category: CodeQL-Javascript
