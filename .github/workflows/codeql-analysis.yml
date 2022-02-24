@@ -39,10 +39,6 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '11'
-    
-    - name: Install jq
-      run: |
-        apt-get install jq -y
 
     - name: Update maven settings
       run: mkdir -p ~/.m2 ; cp .github/settings.xml ~/.m2/
