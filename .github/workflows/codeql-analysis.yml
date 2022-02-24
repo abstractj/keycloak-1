@@ -46,24 +46,21 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
-    # Create the codeql database for java
+    # Create the codeql database for Java and JavaScript
     - name: Create CodeQL database
       if: ${{ matrix.language == 'java' }}
       run: |
-        ./codeql/codeql database create java-database --language=java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
+        ./codeql/codeql database create analysis-database --db-cluster --language=javascript,java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
     
-    # Create the codeql database for javascript
-    - name: Create CodeQL database
-      if: ${{ matrix.language == 'javascript' }}
-      run: |
-        ./codeql/codeql database create java-database --language=javascript --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
-
     # Run the analysis
     - name: Run CodeQL analysis
+      if: ${{ matrix.language == 'java' }}
       run: |
-        ./codeql/codeql database analyze java-database codeql/java-queries --format=sarifv2.1.0 --output=query-results.sarif --download --max-paths=1
+        ./codeql/codeql database analyze analysis-database/java codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1
+        ./codeql/codeql database analyze analysis-database/javascript codeql/javascript-queries --format=sarifv2.1.0 --output=javascript.sarif --download --max-paths=1
     
     # Upload the results
     - name: Upload results to Github
       run: |
-        ./codeql/codeql github upload-results --sarif=query-results.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF}
+        ./codeql/codeql github upload-results --sarif=java.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --github-auth-stdin=${{ secrets.GITHUB_TOKEN }}
+        ./codeql/codeql github upload-results --sarif=javascript.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --github-auth-stdin=${{ secrets.GITHUB_TOKEN }}
