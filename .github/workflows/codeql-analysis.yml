@@ -48,15 +48,19 @@ jobs:
 
     # Create the codeql database for Java and JavaScript
     - name: Create CodeQL database
-      if: ${{ matrix.language == 'java' }}
       run: |
         ./codeql/codeql database create analysis-database --db-cluster --language=javascript,java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
     
     # Run the analysis
-    - name: Run CodeQL analysis
+    - name: Run CodeQL analysis for Java
       if: ${{ matrix.language == 'java' }}
       run: |
         ./codeql/codeql database analyze analysis-database/java codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1
+    
+    # Run the analysis
+    - name: Run CodeQL analysis for JavaScript
+      if: ${{ matrix.language == 'javascript' }}
+      run: |
         ./codeql/codeql database analyze analysis-database/javascript codeql/javascript-queries --format=sarifv2.1.0 --output=javascript.sarif --download --max-paths=1
     
     # Upload the results
