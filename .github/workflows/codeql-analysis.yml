@@ -51,7 +51,7 @@ jobs:
     # Run the analysis
     - name: Run CodeQL analysis for Java
       run: |
-        ./codeql/codeql database analyze analysis-database codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1
+        ./codeql/codeql database analyze analysis-database codeql/java-queries --format=sarifv2.1.0 --output=java.sarif --download --max-paths=1 --sarif-add-query-help
     
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v1
