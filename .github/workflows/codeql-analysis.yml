@@ -65,6 +65,12 @@ jobs:
     
     # Upload the results
     - name: Upload results to Github
+      if: ${{ matrix.language == 'java' }}
       run: |
         ./codeql/codeql github upload-results --sarif=java.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --github-auth-stdin=${{ secrets.GITHUB_TOKEN }}
+          
+    # Upload the results
+    - name: Upload results to Github
+      if: ${{ matrix.language == 'javascript' }}
+      run: |
         ./codeql/codeql github upload-results --sarif=javascript.sarif --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --github-auth-stdin=${{ secrets.GITHUB_TOKEN }}
