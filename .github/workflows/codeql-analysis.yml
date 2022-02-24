@@ -46,12 +46,12 @@ jobs:
     # Create the codeql database for Java and JavaScript
     - name: Create CodeQL database
       run: |
-        ./codeql/codeql database create analysis-database --language=java,javascript --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
+        ./codeql/codeql database create analysis-database --language=java --command='mvn clean install -Dmaven.test.skip -DskipAdapters -DskipTestsuite -DskipExamples -DskipTests'
     
     # Run the analysis
     - name: Run CodeQL analysis for Java
       run: |
-        ./codeql/codeql database analyze analysis-database codeql/java-queries codeql/javascript-queries --format=sarifv2.1.0 --output=results.sarif --download --max-paths=1 --sarif-add-query-help
+        ./codeql/codeql database analyze analysis-database codeql/java-queries --format=sarifv2.1.0 --output=results.sarif --download --max-paths=1 --sarif-add-query-help
     
     - name: Strip optional paths
       run: |
