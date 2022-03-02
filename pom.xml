@@ -1919,6 +1919,27 @@
 
     <profiles>
         <profile>
+            <id>codeql-ci</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>examples/**</exclude>
+                                <exclude>testsuite/**</exclude>
+                                <exclude>adapters/**</exclude>
+                                <exclude>quarkus/tests/**</exclude>
+                                <exclude>**/src/test/java/**</exclude>
+                                <!-- <exclude>**/*Test.java</exclude> -->
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>community</id>
             <activation>
                 <property>
