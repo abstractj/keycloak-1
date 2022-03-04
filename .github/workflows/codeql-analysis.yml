@@ -18,14 +18,13 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-permissions:
-  security-events: write
-
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-
+    permissions:
+      security-events: write
+      actions: read
     strategy:
       fail-fast: false
       matrix:
