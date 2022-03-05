@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package org.keycloak.crypto;
-
+//silly changes
 public interface Algorithm {
 
     String HS256 = "HS256";
