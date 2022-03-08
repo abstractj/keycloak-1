@@ -29,8 +29,17 @@ jobs:
       - name: Update maven settings
         run: mkdir -p ~/.m2 ; cp .github/settings.xml ~/.m2/
 
+      - name: Cache Maven packages
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.m2/repository
+          key: cache-2-${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: cache-1-${{ runner.os }}-m2
+
       - name: Build Keycloak
-        run: mvn clean install -Pdistribution -Dmaven.test.skip -DskipQuarkus -DskipTestsuite -DskipExamples -DskipTests
+        run: mvn clean install  -nsu -B -e -Pdistribution -Dmaven.test.skip -DskipQuarkus -DskipTestsuite -DskipExamples -DskipTests
 
       - uses: snyk/actions/setup@master
       - name: Run Snyk to check for Java vulnerabilities
