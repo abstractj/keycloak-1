@@ -1,0 +1,45 @@
+name: "Snyk"
+
+on:
+  # Disable for push and pull_request until https://github.com/keycloak/keycloak/issues/10203 is resolved
+  push:
+    branches: [main]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [main]
+  schedule:
+    - cron: "0 9 * * 2"
+
+env:
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  DEFAULT_JDK_VERSION: 11
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "${{ env.DEFAULT_JDK_VERSION }}"
+
+      - name: Update maven settings
+        run: mkdir -p ~/.m2 ; cp .github/settings.xml ~/.m2/
+
+      - name: Build Keycloak
+        run: mvn clean install -Dmaven.test.skip -DskipQuarkus -DskipTestsuite -DskipExamples -DskipTests
+
+      - uses: snyk/actions/setup@master
+      - name: Run Snyk to check for Java vulnerabilities
+        run: snyk test --all-projects --exclude=testsuite,examples,adapters --sarif-file-output=snyk.sarif
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: snyk.sarif
