@@ -9,8 +9,6 @@ on:
 # Disable for push and pull_request until https://github.com/keycloak/keycloak/issues/10203 is resolved
   push:
     branches: [main]
-    paths: 
-      - 'adapters/oidc/js/**'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
