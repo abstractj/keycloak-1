@@ -9,9 +9,6 @@ on:
 # Disable for push and pull_request until https://github.com/keycloak/keycloak/issues/10203 is resolved
   push:
     branches: [main]
-    paths-ignore: 
-      - 'themes/**'
-      - 'adapters/oidc/js/**'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
@@ -46,4 +43,4 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
       env: 
-        CODEQL_ACTION_EXTRA_OPTIONS: '{"database":{"interpret-results":["--max-paths",1]}}'
+        CODEQL_ACTION_EXTRA_OPTIONS: '{"database":{"interpret-results":["--max-paths",0]}}'
