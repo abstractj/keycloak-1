@@ -43,7 +43,7 @@ jobs:
 
       - uses: snyk/actions/setup@master
       - name: Run Snyk to check for Java vulnerabilities
-        run: snyk test --all-projects --exclude=testsuite,examples,adapters --sarif-file-output=snyk.sarif
+        run: snyk test --all-projects --sarif-file-output=snyk.sarif quarkus
         continue-on-error: true
         env:
           SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
