@@ -9,15 +9,15 @@ on:
 # Disable for push and pull_request until https://github.com/keycloak/keycloak/issues/10203 is resolved
   push:
     branches: [main]
-  #  paths-ignore:: 
-  #    - 'themes/**'
-  #    - 'adapters/oidc/js/**'
+    paths-ignore: 
+      - 'themes/**'
+      - 'adapters/oidc/js/**'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
-  #  paths-ignore:: 
-  #    - 'themes/**'
-  #    - ''
+    paths-ignore: 
+      - 'themes/**'
+      - 'adapters/oidc/js/**'
   schedule:
     - cron: '0 9 * * 2'
     
