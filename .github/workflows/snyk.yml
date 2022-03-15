@@ -44,8 +44,11 @@ jobs:
         continue-on-error: true
         env:
           SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
+          debug: true
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
+        env:
+          debug: true
         with:
           sarif_file: snyk.sarif
