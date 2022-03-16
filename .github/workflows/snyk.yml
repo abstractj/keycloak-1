@@ -40,7 +40,7 @@ jobs:
 
       - uses: snyk/actions/setup@master
       - name: Run Snyk to check for Java vulnerabilities
-        run: snyk test --all-projects --exclude=testsuite,adapters,examples,wildfly,misc,integration,distribution --sarif-file-output=snyk.sarif
+        run: snyk test --org=boliveir --all-projects --exclude=testsuite,adapters,examples,wildfly,misc,integration,distribution --sarif-file-output=snyk.sarif
         continue-on-error: true
         env:
           SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
