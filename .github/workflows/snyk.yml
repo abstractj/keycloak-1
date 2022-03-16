@@ -41,7 +41,7 @@ jobs:
       - uses: snyk/actions/setup@master
       - name: Run Snyk to check for Java vulnerabilities
         run: snyk test --org=boliveir --all-projects --exclude=testsuite,adapters,examples,wildfly,misc,integration,distribution --sarif-file-output=snyk.sarif quarkus
-        continue-on-error: false
+        continue-on-error: true
         env:
           SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
       # Comment
