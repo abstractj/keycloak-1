@@ -36,12 +36,12 @@ jobs:
           restore-keys: cache-1-${{ runner.os }}-m2
 
       - name: Build Keycloak
-        run: mvn clean install  -nsu -B -e -Pdistribution -Dmaven.test.skip -DskipQuarkus -DskipTestsuite -DskipExamples -DskipTests
+        run: mvn clean install  -nsu -B -e -Dmaven.test.skip -DskipQuarkus -DskipTestsuite -DskipExamples -DskipTests
 
       - uses: snyk/actions/setup@master
       - name: Run Snyk to check for Java vulnerabilities
-        run: snyk test --all-projects --exclude=testsuite,adapters,examples,wildfly,misc,integration --sarif-file-output=snyk.sarif
-        continue-on-error: false
+        run: snyk test --all-projects --exclude=testsuite,adapters,examples,wildfly,misc,integration,distribution --sarif-file-output=snyk.sarif
+        continue-on-error: true
         env:
           SNYK_TOKEN: "${{ env.SNYK_TOKEN }}"
 
