@@ -120,7 +120,7 @@ public class ScriptBasedOIDCProtocolMapper extends AbstractOIDCProtocolMapper im
 
   @Override
   public boolean isSupported() {
-    return Profile.isFeatureEnabled(Profile.Feature.SCRIPTS) && Profile.isFeatureEnabled(Profile.Feature.UPLOAD_SCRIPTS);
+    return Profile.isFeatureEnabled(Profile.Feature.SCRIPTS);
   }
 
   @Override

@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.graphene.page.Page;
@@ -359,6 +360,8 @@ public class AbstractServletPolicyEnforcerTest extends AbstractExampleAdapterTes
 
     @Test
     public void testPathWithPatternSlashAllAndResourceInstance() {
+        driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.HOURS);
+        driver.manage().timeouts().setScriptTimeout(1, TimeUnit.HOURS);
         performTests(() -> {
             ResourceRepresentation resource = new ResourceRepresentation("Pattern 15 Instance");
 

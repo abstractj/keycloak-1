@@ -43,9 +43,22 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.descriptor.api.Descriptor;
 import org.jboss.shrinkwrap.undertow.api.UndertowWebArchive;
+import org.keycloak.authentication.AuthenticatorSpi;
+import org.keycloak.authentication.authenticators.browser.DeployedScriptAuthenticatorFactory;
+import org.keycloak.authorization.policy.provider.PolicySpi;
+import org.keycloak.authorization.policy.provider.js.DeployedScriptPolicyFactory;
+import org.keycloak.common.util.StreamUtil;
 import org.keycloak.common.util.reflections.Reflections;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.protocol.ProtocolMapperSpi;
+import org.keycloak.protocol.oidc.mappers.DeployedScriptOIDCProtocolMapper;
+import org.keycloak.provider.KeycloakDeploymentInfo;
+import org.keycloak.provider.ProviderFactory;
+import org.keycloak.provider.ProviderManager;
+import org.keycloak.provider.Spi;
+import org.keycloak.representations.provider.ScriptProviderDescriptor;
+import org.keycloak.representations.provider.ScriptProviderMetadata;
+import org.keycloak.services.DefaultKeycloakSessionFactory;
 import org.keycloak.services.managers.ApplianceBootstrap;
 import org.keycloak.services.resources.KeycloakApplication;
 import org.keycloak.testsuite.JsonConfigProviderFactory;
@@ -60,10 +73,17 @@ import io.undertow.servlet.api.InstanceHandle;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.servlet.Filter;
 import org.xnio.Options;
 import org.xnio.SslClientAuthMode;
@@ -74,7 +94,7 @@ public class KeycloakOnUndertow implements DeployableContainer<KeycloakOnUnderto
 
     private KeycloakUndertowJaxrsServer undertow;
     private KeycloakOnUndertowConfiguration configuration;
-    private KeycloakSessionFactory sessionFactory;
+    private DefaultKeycloakSessionFactory sessionFactory;
 
     Map<String, String> deployedArchivesToContextPath = new ConcurrentHashMap<>();
 
@@ -221,11 +241,66 @@ public class KeycloakOnUndertow implements DeployableContainer<KeycloakOnUnderto
 
         DeploymentInfo di = createAuthServerDeploymentInfo();
         undertow.deploy(di);
-        sessionFactory = KeycloakApplication.getSessionFactory();
+        sessionFactory = (DefaultKeycloakSessionFactory) KeycloakApplication.getSessionFactory();
+
+        registerScriptProviders();
 
         setupDevConfig();
 
         log.infof("Auth server started in %dms on http://%s:%d/auth", (System.currentTimeMillis() - start), configuration.getBindAddress(), configuration.getBindHttpPort());
+    }
+
+    private void registerScriptProviders() {
+        InputStream scriptProviderStream = getClass().getClassLoader().getResourceAsStream("META-INF/keycloak-scripts.json");
+
+        if (scriptProviderStream != null) {
+            ScriptProviderDescriptor scriptProviderDescriptor;
+
+            try (InputStream inputStream = scriptProviderStream) {
+                scriptProviderDescriptor = JsonSerialization.readValue(inputStream, ScriptProviderDescriptor.class);
+            } catch (IOException cause) {
+                throw new RuntimeException("Failed to read providers metadata", cause);
+            }
+
+            KeycloakDeploymentInfo info = KeycloakDeploymentInfo.create();
+
+            addScriptProvider(info,
+                    scriptProviderDescriptor.getProviders().getOrDefault("authenticators", Collections.emptyList()),
+                    AuthenticatorSpi.class,
+                    DeployedScriptAuthenticatorFactory::new);
+            addScriptProvider(info, scriptProviderDescriptor.getProviders().getOrDefault("mappers", Collections.emptyList()),
+                    ProtocolMapperSpi.class,
+                    DeployedScriptOIDCProtocolMapper::new);
+            addScriptProvider(info, scriptProviderDescriptor.getProviders().getOrDefault("policies", Collections.emptyList()),
+                    PolicySpi.class,
+                    DeployedScriptPolicyFactory::new);
+
+            sessionFactory.deploy(new ProviderManager(info, getClass().getClassLoader()));
+        }
+    }
+
+    private void addScriptProvider(KeycloakDeploymentInfo info, List<ScriptProviderMetadata> scriptsMetadata, Class<? extends Spi> spiType, Function<ScriptProviderMetadata, ProviderFactory> providerCreator) {
+        for (ScriptProviderMetadata metadata : scriptsMetadata) {
+            String fileName = metadata.getFileName();
+
+            metadata.setId(new StringBuilder("script").append("-").append(fileName).toString());
+
+            String name = metadata.getName();
+
+            if (name == null) {
+                name = fileName;
+            }
+
+            metadata.setName(name);
+
+            try (InputStream jsCode = getClass().getClassLoader().getResourceAsStream(metadata.getFileName())) {
+                metadata.setCode(StreamUtil.readString(jsCode, StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load script from [" + metadata.getFileName() + "]", e);
+            }
+
+            info.addProvider(spiType, providerCreator.apply(metadata));
+        }
     }
 
     protected void setupDevConfig() {
