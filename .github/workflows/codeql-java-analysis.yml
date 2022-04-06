@@ -32,8 +32,6 @@ jobs:
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2.1.7
-      env: 
-        CODEQL_ACTION_EXTRA_OPTIONS: '{"database":{"finalize":["--no-run-unnecessary-builds"]}}'
       with:
         languages: java
       
